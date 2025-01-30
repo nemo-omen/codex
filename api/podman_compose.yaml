@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  postgres:
+    image: docker.io/postgres:latest
+    environment:
+      - POSTGRES_USER=CodexAdmin
+      - POSTGRES_PASSWORD=Password123!
+    volumes:
+      - codex-data:/var/lib/postgresql/data
+      - codex-export:/export
+    ports:
+      - 5432:5432
+    # networks:
+    #   - postgres-db-network
+
+volumes:
+  codex-data:
+  codex-export:
+# networks:
+#   postgres-db-network:
+#     driver: bridge
