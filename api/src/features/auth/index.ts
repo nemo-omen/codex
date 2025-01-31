@@ -1,10 +1,9 @@
 import { Context, Hono, HonoRequest } from "hono";
-import { db } from "../../data/db";
 
 const app = new Hono();
 
 app.post('/login', async (c: Context) => {
-    const result = await db.execute(`SELECT 1`);
+    const result = await c.var.db.execute(`SELECT 1`);
     console.log(result);
     return c.json({ message: 'Login successful' });
 });

@@ -1,12 +1,13 @@
-import { Hono } from 'hono';
 import auth from './features/auth';
+import { factory } from './appFactory';
 
-const app = new Hono();
+const app = factory.createApp()
+  .basePath('/api')
+  .route('/auth', auth);
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
-});
+const port = 3000;
 
-app.route('/auth', auth);
-
-export default app;
+export default {
+  port,
+  fetch: app.fetch,
+};
