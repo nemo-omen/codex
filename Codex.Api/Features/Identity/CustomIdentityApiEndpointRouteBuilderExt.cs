@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using Codex.Api.Features.Identity.Types;
+using Codex.Api.Models;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -10,11 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using TheAggregate.Api.Features.Identity.Types;
-using TheAggregate.Api.Models;
-using TheAggregate.Api.Shared.Util;
 
-namespace TheAggregate.Api.Features.Identity;
+namespace Codex.Api.Features.Identity;
 
 // ReSharper disable once InvalidXmlDocComment
 /// <summary>
@@ -76,7 +75,7 @@ public static class IdentityApiEndpointRouteBuilderExtensions
 
             var user = new TUser
             {
-                Name = registration.Name?? "",
+                Name = registration.Name ?? "",
                 Email = registration.Email,
             };
             await userStore.SetUserNameAsync(user, email, CancellationToken.None);
@@ -85,8 +84,7 @@ public static class IdentityApiEndpointRouteBuilderExtensions
 
             if (!result.Succeeded)
             {
-                Banner.Log(result.Errors.First().Code);
-                if(result.Errors.Any(e => e.Code == "DuplicateUserName"))
+                if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
                 {
                     var problem = TypedResults.ValidationProblem(new Dictionary<string, string[]> {
                         { "InvalidCredentials", ["Email or password are not valid."] }
@@ -376,7 +374,7 @@ public static class IdentityApiEndpointRouteBuilderExtensions
 
             return TypedResults.Ok(await CreateUserWithRolesResponseAsync(user, userManager));
         });
-        
+
         // Original endpoint requires type `InfoRequest`, which we're customizing
         // to allow the user to update custom properties on ApplicationUser
         accountGroup.MapPost("/info", async Task<Results<Ok<InfoResponse>, ValidationProblem, NotFound>>
@@ -388,17 +386,17 @@ public static class IdentityApiEndpointRouteBuilderExtensions
                 return TypedResults.NotFound();
             }
 
-            if(!string.IsNullOrEmpty(infoRequest.Name))
+            if (!string.IsNullOrEmpty(infoRequest.Name))
             {
                 user.Name = infoRequest.Name;
                 await userManager.UpdateAsync(user);
             }
-        
+
             if (!string.IsNullOrEmpty(infoRequest.NewEmail) && !EmailAddressAttribute.IsValid(infoRequest.NewEmail))
             {
                 return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(infoRequest.NewEmail)));
             }
-        
+
             if (!string.IsNullOrEmpty(infoRequest.NewPassword))
             {
                 if (string.IsNullOrEmpty(infoRequest.OldPassword))
@@ -406,24 +404,24 @@ public static class IdentityApiEndpointRouteBuilderExtensions
                     return CreateValidationProblem("OldPasswordRequired",
                         "The old password is required to set a new password. If the old password is forgotten, use /resetPassword.");
                 }
-        
+
                 var changePasswordResult = await userManager.ChangePasswordAsync(user, infoRequest.OldPassword, infoRequest.NewPassword);
                 if (!changePasswordResult.Succeeded)
                 {
                     return CreateValidationProblem(changePasswordResult);
                 }
             }
-        
+
             if (!string.IsNullOrEmpty(infoRequest.NewEmail))
             {
                 var email = await userManager.GetEmailAsync(user);
-        
+
                 if (email != infoRequest.NewEmail)
                 {
                     await SendConfirmationEmailAsync(user, userManager, context, infoRequest.NewEmail, isChange: true);
                 }
             }
-        
+
             return TypedResults.Ok(await CreateInfoResponseAsync(user, userManager));
         });
 
@@ -493,18 +491,18 @@ public static class IdentityApiEndpointRouteBuilderExtensions
 
         return TypedResults.ValidationProblem(errorDictionary);
     }
-    
+
     private static async Task<UserWithRolesResponse> CreateUserWithRolesResponseAsync<TUser>(ApplicationUser user, UserManager<TUser> userManager)
         where TUser : class
     {
         var userRoles = await userManager.GetRolesAsync((user as TUser)!);
         var userEmail = await userManager.GetEmailAsync((user as TUser)!) ?? throw new NotSupportedException("Users must have an email.");
         var userName = await userManager.GetUserNameAsync((user as TUser)!) ?? throw new NotSupportedException("Users must have a name.");
-        
+
         return new UserWithRolesResponse
         {
-            Name = user.Name?? userName,
-            Email = user.Email?? userEmail,
+            Name = user.Name ?? userName,
+            Email = user.Email ?? userEmail,
             Roles = userRoles,
         };
     }

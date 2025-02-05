@@ -1,6 +1,4 @@
-using TheAggregate.Api.Shared.Util;
-
-namespace TheAggregate.Api.Features.Identity;
+namespace Codex.Api.Features.Identity;
 
 public interface IUserResolverService
 {
@@ -10,17 +8,19 @@ public interface IUserResolverService
 public class UserResolverService : IUserResolverService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<UserResolverService> _logger;
 
-    public UserResolverService(IHttpContextAccessor httpContextAccessor)
+    public UserResolverService(IHttpContextAccessor httpContextAccessor, ILogger<UserResolverService> logger)
     {
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     public string GetUserIdentityName()
     {
         var httpContext = _httpContextAccessor.HttpContext;
         var userIdName = string.Empty;
-        
+
         if (httpContext is null)
         {
             return userIdName;
@@ -34,7 +34,7 @@ public class UserResolverService : IUserResolverService
 
         if (sessionIdentity.IsAuthenticated)
         {
-            Banner.Log(sessionIdentity.Name ?? "No name???");
+            _logger.LogInformation("Session identity is authenticated");
         }
 
         if (sessionIdentity.Name != null)

@@ -1,4 +1,4 @@
-namespace TheAggregate.Api.Models;
+namespace Codex.Api.Models;
 
 public class BaseModel
 {

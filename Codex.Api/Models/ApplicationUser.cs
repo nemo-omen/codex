@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace TheAggregate.Api.Models;
+namespace Codex.Api.Models;
 
 public class ApplicationUser : IdentityUser
 {

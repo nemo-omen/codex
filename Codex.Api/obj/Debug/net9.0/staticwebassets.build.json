@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "8zhEK7d71xt6q7Y3z7/37sbNAeo9RWYrUTS2+kfvkIQ=",
+  "Source": "Codex.Api",
+  "BasePath": "_content/Codex.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
