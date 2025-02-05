@@ -18,8 +18,7 @@
     <ItemGroup>
       <Folder Include="Features/Notes/" />
       <Folder Include="Features/Notes/Types/" />
-      <Folder Include="Features/Projects/" />
-      <Folder Include="Features/Projects/Types/" />
+      <Folder Include="Features/Collections/" />
       <Folder Include="Features\" />
       <Folder Include="Shared/" />
       <Folder Include="Shared/Http/" />
