@@ -1,9 +1,7 @@
 using System.Security.Claims;
 using Codex.Api.Exceptions;
 using Codex.Api.Features.Bookmarks.Types;
-using Codex.Api.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Codex.Api.Features.Bookmarks;
@@ -75,7 +73,15 @@ public class BookmarksController : ControllerBase
 		{
 			var bookmark = await _bookmarksService.GetBookmarkByIdAsync(id);
 			if (bookmark == null) return NotFound();
-			return Ok(bookmark);
+			var bookmarkResponse = new BookmarkResponse
+			{
+				Id = bookmark.Id,
+				Title = bookmark.Title,
+				Description = bookmark.Description,
+				Url = bookmark.Url,
+				UserId = bookmark.UserId
+			};
+			return Ok(bookmarkResponse);
 		}
 		catch (Exception e)
 		{

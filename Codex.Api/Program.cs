@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Codex.Api.Data;
 using Codex.Api.Features.Bookmarks;
 using Codex.Api.Features.Identity;
+using Codex.Api.Features.Notes;
 using Codex.Api.Models;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +63,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IBookmarksRepository, BookmarksRepository>();
 builder.Services.AddScoped<IBookmarksService, BookmarksService>();
+builder.Services.AddScoped<INotesRepository, NotesRepository>();
+builder.Services.AddScoped<INotesService, NotesService>();
 
 var app = builder.Build();
 

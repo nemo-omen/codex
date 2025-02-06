@@ -37,6 +37,7 @@ public class BookmarksRepository : IBookmarksRepository
 	{
 		_logger.LogInformation($"Attempting to retrieve bookmarks for user: {userId}");
 		var bookmarks = await _context.Bookmarks
+			.Include(b => b.Notes)
 			.Where(b => b.UserId == userId)
 			.ToListAsync();
 		_logger.LogInformation($"Successfully retrieved {bookmarks.Count} bookmarks for user: {userId}");
