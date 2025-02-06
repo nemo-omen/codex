@@ -1,5 +1,6 @@
-using System;
 using Codex.Api.Data;
+using Codex.Api.Exceptions;
+using Codex.Api.Features.Bookmarks.Types;
 using Codex.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace Codex.Api.Features.Bookmarks;
 
 public interface IBookmarksRepository
 {
+	Task<List<Bookmark>> GetBookmarksAsync(string userId);
 	Task<Bookmark?> GetBookmarkByIdAsync(Guid id);
 	Task<Bookmark?> GetBookmarkByUrlAsync(string url);
 	Task<Guid> CreateBookmarkAsync(Bookmark bookmark);
-	Task UpdateBookmarkAsync(Bookmark bookmark);
+	Task UpdateBookmarkAsync(UpdateBookmarkRequest bookmark);
+	Task DeleteBookmarkAsync(Guid id);
 }
 
 public class BookmarksRepository : IBookmarksRepository
@@ -22,6 +25,22 @@ public class BookmarksRepository : IBookmarksRepository
 	{
 		_logger = logger;
 		_context = context;
+	}
+
+
+	/// <summary>
+	/// Retrieves all bookmarks for the given user ID.
+	/// </summary>
+	/// <param name="userId">The ID of the user to retrieve bookmarks for.</param>
+	/// <returns>A list of bookmarks for the given user.</returns>
+	public async Task<List<Bookmark>> GetBookmarksAsync(string userId)
+	{
+		_logger.LogInformation($"Attempting to retrieve bookmarks for user: {userId}");
+		var bookmarks = await _context.Bookmarks
+			.Where(b => b.UserId == userId)
+			.ToListAsync();
+		_logger.LogInformation($"Successfully retrieved {bookmarks.Count} bookmarks for user: {userId}");
+		return bookmarks;
 	}
 
 	/// <summary>
@@ -72,7 +91,6 @@ public class BookmarksRepository : IBookmarksRepository
 		return bookmark;
 	}
 
-
 	/// <summary>
 	/// Creates a new bookmark in the database.
 	/// </summary>
@@ -100,28 +118,29 @@ public class BookmarksRepository : IBookmarksRepository
 	/// <summary>
 	/// Updates an existing bookmark in the database with the provided data.
 	/// </summary>
-	/// <param name="bookmark">The bookmark data to update, including the ID of the bookmark to be updated.</param>
+	/// <param name="updateRequest">The bookmark data to update, including the ID of the bookmark to be updated.</param>
 	/// <exception cref="ArgumentException">Thrown when the ID of the bookmark is not provided.</exception>
+	/// <exception cref="NotFoundException">Thrown when the a bookmark with the provided ID is not found.</exception>
 	/// <remarks>If the bookmark with the given ID does not exist, a warning is logged and no update is performed.</remarks>
-	public async Task UpdateBookmarkAsync(Bookmark bookmark)
+	public async Task UpdateBookmarkAsync(UpdateBookmarkRequest updateRequest)
 	{
-		if (bookmark.Id == Guid.Empty)
+		if (updateRequest.Id == Guid.Empty)
 			throw new ArgumentException("Id is required.");
 
-		_logger.LogInformation($"Attempting to update bookmark: {bookmark.Id}");
+		_logger.LogInformation($"Attempting to update bookmark: {updateRequest.Id}");
 
 		var toUpdate = await _context.Bookmarks
-			.FirstOrDefaultAsync(b => b.Id == bookmark.Id);
+			.FirstOrDefaultAsync(b => b.Id == updateRequest.Id);
 
 		if (toUpdate == null)
 		{
-			_logger.LogWarning($"Bookmark with ID: {bookmark.Id} not found.");
-			return;
+			_logger.LogWarning($"Bookmark with ID: {updateRequest.Id} not found.");
+			throw new NotFoundException($"Bookmark with ID: {updateRequest.Id} not found.");
 		}
 
-		toUpdate.Title = bookmark.Title ?? toUpdate.Title;
-		toUpdate.Url = bookmark.Url ?? toUpdate.Url;
-		toUpdate.Description = bookmark.Description ?? toUpdate.Description;
+		toUpdate.Title = updateRequest.Title ?? toUpdate.Title;
+		toUpdate.Url = updateRequest.Url ?? toUpdate.Url;
+		toUpdate.Description = updateRequest.Description ?? toUpdate.Description;
 
 		_context.Update(toUpdate);
 		try
@@ -133,6 +152,38 @@ public class BookmarksRepository : IBookmarksRepository
 			_logger.LogError(e.Message);
 			throw;
 		}
-		_logger.LogInformation($"Bookmark with ID: {bookmark.Id} updated successfully.");
+		_logger.LogInformation($"Bookmark with ID: {updateRequest.Id} updated successfully.");
+	}
+
+
+	/// <summary>
+	/// Deletes the bookmark with the given ID from the database.
+	/// </summary>
+	/// <param name="id">The ID of the bookmark to delete.</param>
+	/// <exception cref="NotFoundException">Thrown if the bookmark with the given ID does not exist.</exception>
+	/// <remarks>If the bookmark with the given ID does not exist, a warning is logged and no deletion is performed.</remarks>
+	public async Task DeleteBookmarkAsync(Guid id)
+	{
+		_logger.LogInformation($"Attempting to delete bookmark with ID: {id}");
+		var bookmark = await _context.Bookmarks
+			.FirstOrDefaultAsync(b => b.Id == id);
+		if (bookmark == null)
+		{
+			_logger.LogError($"Bookmark with id {id} not found.");
+			throw new NotFoundException("Bookmark not found.");
+		}
+
+		_context.Remove(bookmark);
+		try
+		{
+			await _context.SaveChangesAsync();
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e.Message);
+			throw;
+		}
+		_logger.LogInformation($"Bookmark with ID: {id} deleted successfully.");
+
 	}
 }
