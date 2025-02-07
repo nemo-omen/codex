@@ -58,8 +58,10 @@ else
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options
-	.UseNpgsql(connectionString), ServiceLifetime.Transient);
+{
+	options.UseNpgsql(connectionString);
+	options.EnableDetailedErrors();
+}, ServiceLifetime.Transient);
 
 builder.Services.AddScoped<IBookmarksRepository, BookmarksRepository>();
 builder.Services.AddScoped<IBookmarksService, BookmarksService>();

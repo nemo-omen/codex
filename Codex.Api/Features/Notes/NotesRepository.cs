@@ -75,6 +75,7 @@ public class NotesRepository : INotesRepository
 		var note = await _context.Notes
 			.Include(n => n.IncomingLinks)
 			.Include(n => n.OutgoingLinks)
+				.ThenInclude(l => l.Target)
 			.FirstOrDefaultAsync(n => n.Id == request.Id);
 
 		if (note == null)
@@ -87,22 +88,50 @@ public class NotesRepository : INotesRepository
 		{
 			foreach (var link in request.OutgoingLinks)
 			{
-				var existingLink = note.OutgoingLinks.FirstOrDefault(l => l.TargetId == link.TargetId);
-				if (existingLink == null)
+				var existingLink = note.OutgoingLinks
+					.FirstOrDefault(l => l.TargetId == link.TargetId);
+
+				var targetNote = await _context.Notes
+					.FirstOrDefaultAsync(n => n.Id == link.TargetId);
+
+				if (targetNote is null) throw new NotFoundException("Target note not found.");
+
+				if (existingLink is null)
 				{
-					note.OutgoingLinks.Add(new NoteLink
+					var newLink = new NoteLink
 					{
-						Text = link.Text,
-						Source = note,
-						TargetId = link.TargetId
-					});
+						Id = Guid.NewGuid(),
+						Text = link.Text!,
+						SourceId = note.Id,
+						TargetId = link.TargetId,
+						StartIndex = link.StartIndex,
+						EndIndex = link.EndIndex,
+					};
+
+					note.OutgoingLinks.Add(newLink);
+					targetNote.IncomingLinks.Add(newLink);
+					await _context.NoteLinks.AddAsync(newLink);
 				}
 				else
 				{
+					// check whether the link target has changed
+					var originalLinkTarget = existingLink.Target;
+					if (originalLinkTarget is not null)
+					{
+						// if the target has changed, remove the link
+						if (originalLinkTarget.Id != link.TargetId)
+						{
+							originalLinkTarget.OutgoingLinks.Remove(existingLink);
+						}
+					}
+
+					// update the existing link and add it to the target
 					existingLink.TargetId = link.TargetId;
 					existingLink.Text = link.Text ?? existingLink.Text;
 					existingLink.SourceId = link.SourceId;
+					targetNote.IncomingLinks.Add(existingLink);
 				}
+				// _context.Update(targetNote);
 			}
 		}
 
@@ -113,12 +142,17 @@ public class NotesRepository : INotesRepository
 				var existingLink = note.IncomingLinks.FirstOrDefault(l => l.TargetId == link.TargetId);
 				if (existingLink == null)
 				{
-					note.IncomingLinks.Add(new NoteLink
+					var newLink = new NoteLink
 					{
-						Text = link.Text,
-						Source = note,
-						TargetId = link.TargetId
-					});
+						Text = link.Text!,
+						SourceId = note.Id,
+						TargetId = link.TargetId,
+						StartIndex = link.StartIndex,
+						EndIndex = link.EndIndex
+					};
+
+					note.IncomingLinks.Add(newLink);
+					await _context.NoteLinks.AddAsync(newLink);
 				}
 				else
 				{
@@ -129,7 +163,7 @@ public class NotesRepository : INotesRepository
 			}
 		}
 
-		_context.Update(note);
+		// _context.Update(note);
 		await _context.SaveChangesAsync();
 		return note;
 	}

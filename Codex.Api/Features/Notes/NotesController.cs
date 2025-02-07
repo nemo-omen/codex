@@ -91,4 +91,31 @@ public class NotesController : Controller
 			return StatusCode(500, e.Message);
 		}
 	}
+
+	[HttpPut]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> UpdateNoteAsync([FromBody] EditNoteRequest request)
+	{
+		if (!ModelState.IsValid) return UnprocessableEntity(ModelState);
+
+		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+		if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+		try
+		{
+			await _noteService.UpdateNoteAsync(request);
+			return Ok();
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e.Message);
+			return StatusCode(500, e.Message);
+		}
+	}
 }

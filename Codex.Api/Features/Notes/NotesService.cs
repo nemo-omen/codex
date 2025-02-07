@@ -8,7 +8,8 @@ public interface INotesService
 {
 	Task<Guid> CreateNoteAsync(CreateNoteRequest request);
 	Task<Note> GetNoteByIdAsync(Guid id);
-	Task<List<Note>> GetNotesAsync(string userId);
+	Task<List<NoteResponse>> GetNotesAsync(string userId);
+	Task UpdateNoteAsync(EditNoteRequest request);
 }
 
 public class NotesService : INotesService
@@ -32,8 +33,38 @@ public class NotesService : INotesService
 		return await _notesRepository.GetNoteByIdAsync(id);
 	}
 
-	public async Task<List<Note>> GetNotesAsync(string userId)
+	public async Task<List<NoteResponse>> GetNotesAsync(string userId)
 	{
-		return await _notesRepository.GetNotesAsync(userId);
+		var notes = await _notesRepository.GetNotesAsync(userId);
+		var responses = notes.Select(n => new NoteResponse
+		{
+			Id = n.Id,
+			Title = n.Title,
+			Content = n.Content,
+			UserId = n.UserId,
+			BookmarkId = n.BookmarkId,
+			IncomingLinks = n.IncomingLinks.Select(l => new NoteLinkResponse
+			{
+				Text = l.Text,
+				StartIndex = l.StartIndex,
+				EndIndex = l.EndIndex,
+				SourceId = l.SourceId,
+				TargetId = l.TargetId
+			}).ToList(),
+			OutgoingLinks = n.OutgoingLinks.Select(l => new NoteLinkResponse
+			{
+				Text = l.Text,
+				StartIndex = l.StartIndex,
+				EndIndex = l.EndIndex,
+				SourceId = l.SourceId,
+				TargetId = l.TargetId
+			}).ToList()
+		}).ToList();
+		return responses;
+	}
+
+	public Task UpdateNoteAsync(EditNoteRequest request)
+	{
+		return _notesRepository.UpdateNoteAsync(request);
 	}
 }

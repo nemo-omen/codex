@@ -9,6 +9,6 @@ public record EditNoteRequest
 	public string? Content { get; set; }
 	public Guid? BookmarkId { get; set; }
 	public required string UserId { get; set; }
-	public List<NoteLink>? IncomingLinks { get; set; }
-	public List<NoteLink>? OutgoingLinks { get; set; }
+	public List<EditNoteLinkRequest>? IncomingLinks { get; set; }
+	public List<EditNoteLinkRequest>? OutgoingLinks { get; set; }
 }
