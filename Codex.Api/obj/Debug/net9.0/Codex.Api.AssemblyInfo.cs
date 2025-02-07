@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Codex.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17fa8dd2c29c5e3509cd460562545cfcd31157aa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+15863f61265d7c5a62a63d7df74efc91edcc124f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Codex.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Codex.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

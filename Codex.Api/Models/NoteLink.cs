@@ -8,7 +8,7 @@ public class NoteLink : BaseModel
 	public int StartIndex { get; set; }
 	public int EndIndex { get; set; }
 	public Guid SourceId { get; set; }
-	public Note Source { get; set; } = null!;
+	public Note Source { get; set; }
 	public Guid TargetId { get; set; }
-	public Note Target { get; set; } = null!;
+	public Note Target { get; set; }
 }

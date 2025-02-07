@@ -1,11 +1,14 @@
 using System;
 using Codex.Api.Features.Notes.Types;
+using Codex.Api.Models;
 
 namespace Codex.Api.Features.Notes;
 
 public interface INotesService
 {
 	Task<Guid> CreateNoteAsync(CreateNoteRequest request);
+	Task<Note> GetNoteByIdAsync(Guid id);
+	Task<List<Note>> GetNotesAsync(string userId);
 }
 
 public class NotesService : INotesService
@@ -22,5 +25,15 @@ public class NotesService : INotesService
 	public async Task<Guid> CreateNoteAsync(CreateNoteRequest request)
 	{
 		return await _notesRepository.CreateNoteAsync(request);
+	}
+
+	public async Task<Note> GetNoteByIdAsync(Guid id)
+	{
+		return await _notesRepository.GetNoteByIdAsync(id);
+	}
+
+	public async Task<List<Note>> GetNotesAsync(string userId)
+	{
+		return await _notesRepository.GetNotesAsync(userId);
 	}
 }
