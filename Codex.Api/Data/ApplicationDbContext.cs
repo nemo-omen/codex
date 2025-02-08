@@ -32,4 +32,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 	public DbSet<Bookmark> Bookmarks { get; set; }
 	public DbSet<Note> Notes { get; set; }
 	public DbSet<NoteLink> NoteLinks { get; set; }
+	public DbSet<Collection> Collections { get; set; }
 }

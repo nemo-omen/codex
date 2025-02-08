@@ -3,6 +3,7 @@ using System;
 using Codex.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Codex.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250208035134_ActuallyAddCollections")]
+    partial class ActuallyAddCollections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,7 +349,7 @@ namespace Codex.Api.Migrations
 
             modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
                 {
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
+                    b.HasOne("Codex.Api.Models.Collection", null)
                         .WithMany("Bookmarks")
                         .HasForeignKey("CollectionId");
 
@@ -356,15 +359,13 @@ namespace Codex.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Collection");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("Codex.Api.Models.Collection", b =>
                 {
                     b.HasOne("Codex.Api.Models.ApplicationUser", "User")
-                        .WithMany("Collections")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -380,7 +381,7 @@ namespace Codex.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
+                    b.HasOne("Codex.Api.Models.Collection", null)
                         .WithMany("Notes")
                         .HasForeignKey("CollectionId");
 
@@ -391,8 +392,6 @@ namespace Codex.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Bookmark");
-
-                    b.Navigation("Collection");
 
                     b.Navigation("User");
                 });
@@ -465,11 +464,6 @@ namespace Codex.Api.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Codex.Api.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Collections");
                 });
 
             modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>

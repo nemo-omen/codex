@@ -3,6 +3,7 @@ using System;
 using Codex.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Codex.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250208034245_AddCollections")]
+    partial class AddCollections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,9 +99,6 @@ namespace Codex.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CollectionId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -116,35 +116,9 @@ namespace Codex.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CollectionId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Bookmarks");
-                });
-
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Collections");
                 });
 
             modelBuilder.Entity("Codex.Api.Models.Note", b =>
@@ -154,9 +128,6 @@ namespace Codex.Api.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("BookmarkId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CollectionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
@@ -173,8 +144,6 @@ namespace Codex.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BookmarkId");
-
-                    b.HasIndex("CollectionId");
 
                     b.HasIndex("UserId");
 
@@ -346,25 +315,8 @@ namespace Codex.Api.Migrations
 
             modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
                 {
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
-                        .WithMany("Bookmarks")
-                        .HasForeignKey("CollectionId");
-
                     b.HasOne("Codex.Api.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Collection");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
-                {
-                    b.HasOne("Codex.Api.Models.ApplicationUser", "User")
-                        .WithMany("Collections")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -380,10 +332,6 @@ namespace Codex.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
-                        .WithMany("Notes")
-                        .HasForeignKey("CollectionId");
-
                     b.HasOne("Codex.Api.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -391,8 +339,6 @@ namespace Codex.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Bookmark");
-
-                    b.Navigation("Collection");
 
                     b.Navigation("User");
                 });
@@ -467,20 +413,8 @@ namespace Codex.Api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Collections");
-                });
-
             modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
                 {
-                    b.Navigation("Notes");
-                });
-
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
-                {
-                    b.Navigation("Bookmarks");
-
                     b.Navigation("Notes");
                 });
 

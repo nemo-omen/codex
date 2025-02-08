@@ -16,7 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features/Collections/" />
       <Folder Include="Features\" />
       <Folder Include="Shared/" />
       <Folder Include="Shared/Http/" />
