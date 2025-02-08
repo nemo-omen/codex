@@ -13,6 +13,7 @@ public interface INotesRepository
 	Task<Note> GetNoteByIdAsync(Guid id);
 	Task<Guid> CreateNoteAsync(CreateNoteRequest request);
 	Task<Note> UpdateNoteAsync(EditNoteRequest request);
+	Task DeleteNoteAsync(Guid id);
 }
 
 public class NotesRepository : INotesRepository
@@ -166,5 +167,31 @@ public class NotesRepository : INotesRepository
 		// _context.Update(note);
 		await _context.SaveChangesAsync();
 		return note;
+	}
+
+	public async Task DeleteNoteAsync(Guid id)
+	{
+		var note = await _context.Notes
+			.Include(n => n.IncomingLinks)
+				.ThenInclude(l => l.Source)
+			.Include(n => n.OutgoingLinks)
+				.ThenInclude(l => l.Target)
+			.FirstOrDefaultAsync(n => n.Id == id) ??
+				throw new NotFoundException("Note not found.");
+
+		foreach (var link in note.IncomingLinks)
+		{
+			link.Source.OutgoingLinks.Remove(link);
+			_context.NoteLinks.Remove(link);
+		}
+
+		foreach (var link in note.OutgoingLinks)
+		{
+			link.Target.IncomingLinks.Remove(link);
+			_context.NoteLinks.Remove(link);
+		}
+
+		_context.Notes.Remove(note);
+		await _context.SaveChangesAsync();
 	}
 }

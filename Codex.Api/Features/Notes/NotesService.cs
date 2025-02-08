@@ -10,6 +10,7 @@ public interface INotesService
 	Task<Note> GetNoteByIdAsync(Guid id);
 	Task<List<NoteResponse>> GetNotesAsync(string userId);
 	Task UpdateNoteAsync(EditNoteRequest request);
+	Task DeleteNoteAsync(Guid id);
 }
 
 public class NotesService : INotesService
@@ -66,5 +67,10 @@ public class NotesService : INotesService
 	public Task UpdateNoteAsync(EditNoteRequest request)
 	{
 		return _notesRepository.UpdateNoteAsync(request);
+	}
+
+	public Task DeleteNoteAsync(Guid id)
+	{
+		return _notesRepository.DeleteNoteAsync(id);
 	}
 }

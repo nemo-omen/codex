@@ -118,4 +118,28 @@ public class NotesController : Controller
 			return StatusCode(500, e.Message);
 		}
 	}
+
+	[HttpDelete("{id:guid}")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	public async Task<IActionResult> DeleteNoteAsync(Guid id)
+	{
+		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+		if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+		try
+		{
+			await _noteService.DeleteNoteAsync(id);
+			return Ok();
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e.Message);
+			return StatusCode(500, e.Message);
+		}
+	}
 }
