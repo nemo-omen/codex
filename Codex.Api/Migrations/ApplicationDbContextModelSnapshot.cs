@@ -90,7 +90,7 @@ namespace Codex.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
+            modelBuilder.Entity("Codex.Api.Models.BookmarkEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,10 +120,13 @@ namespace Codex.Api.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Url", "UserId")
+                        .IsUnique();
+
                     b.ToTable("Bookmarks");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
+            modelBuilder.Entity("Codex.Api.Models.CollectionEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -144,31 +147,37 @@ namespace Codex.Api.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
+
                     b.ToTable("Collections");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Note", b =>
+            modelBuilder.Entity("Codex.Api.Models.NoteEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BookmarkId")
+                    b.Property<Guid?>("BookmarkId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CollectionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
+                        .HasMaxLength(2147483647)
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
 
                     b.HasKey("Id");
 
@@ -178,10 +187,13 @@ namespace Codex.Api.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Title", "UserId", "BookmarkId")
+                        .IsUnique();
+
                     b.ToTable("Notes");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.NoteLink", b =>
+            modelBuilder.Entity("Codex.Api.Models.NoteLinkEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -208,6 +220,9 @@ namespace Codex.Api.Migrations
                     b.HasIndex("SourceId");
 
                     b.HasIndex("TargetId");
+
+                    b.HasIndex("StartIndex", "EndIndex", "SourceId", "TargetId")
+                        .IsUnique();
 
                     b.ToTable("NoteLinks");
                 });
@@ -344,9 +359,9 @@ namespace Codex.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
+            modelBuilder.Entity("Codex.Api.Models.BookmarkEntity", b =>
                 {
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
+                    b.HasOne("Codex.Api.Models.CollectionEntity", "Collection")
                         .WithMany("Bookmarks")
                         .HasForeignKey("CollectionId");
 
@@ -361,7 +376,7 @@ namespace Codex.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
+            modelBuilder.Entity("Codex.Api.Models.CollectionEntity", b =>
                 {
                     b.HasOne("Codex.Api.Models.ApplicationUser", "User")
                         .WithMany("Collections")
@@ -372,15 +387,13 @@ namespace Codex.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Note", b =>
+            modelBuilder.Entity("Codex.Api.Models.NoteEntity", b =>
                 {
-                    b.HasOne("Codex.Api.Models.Bookmark", "Bookmark")
+                    b.HasOne("Codex.Api.Models.BookmarkEntity", "Bookmark")
                         .WithMany("Notes")
-                        .HasForeignKey("BookmarkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookmarkId");
 
-                    b.HasOne("Codex.Api.Models.Collection", "Collection")
+                    b.HasOne("Codex.Api.Models.CollectionEntity", "Collection")
                         .WithMany("Notes")
                         .HasForeignKey("CollectionId");
 
@@ -397,15 +410,15 @@ namespace Codex.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.NoteLink", b =>
+            modelBuilder.Entity("Codex.Api.Models.NoteLinkEntity", b =>
                 {
-                    b.HasOne("Codex.Api.Models.Note", "Source")
+                    b.HasOne("Codex.Api.Models.NoteEntity", "Source")
                         .WithMany("OutgoingLinks")
                         .HasForeignKey("SourceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Codex.Api.Models.Note", "Target")
+                    b.HasOne("Codex.Api.Models.NoteEntity", "Target")
                         .WithMany("IncomingLinks")
                         .HasForeignKey("TargetId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -472,19 +485,19 @@ namespace Codex.Api.Migrations
                     b.Navigation("Collections");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Bookmark", b =>
+            modelBuilder.Entity("Codex.Api.Models.BookmarkEntity", b =>
                 {
                     b.Navigation("Notes");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Collection", b =>
+            modelBuilder.Entity("Codex.Api.Models.CollectionEntity", b =>
                 {
                     b.Navigation("Bookmarks");
 
                     b.Navigation("Notes");
                 });
 
-            modelBuilder.Entity("Codex.Api.Models.Note", b =>
+            modelBuilder.Entity("Codex.Api.Models.NoteEntity", b =>
                 {
                     b.Navigation("IncomingLinks");
 

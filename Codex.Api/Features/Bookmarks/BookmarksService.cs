@@ -1,14 +1,17 @@
 using System;
+using Codex.Api.Exceptions;
+using Codex.Api.Features.Bookmarks.Mappers;
 using Codex.Api.Features.Bookmarks.Types;
 using Codex.Api.Models;
+using EntityFramework.Exceptions.Common;
 using Microsoft.Build.Framework;
 
 namespace Codex.Api.Features.Bookmarks;
 
 public interface IBookmarksService
 {
-	Task<Bookmark?> GetBookmarkByIdAsync(Guid id);
-	Task<List<Bookmark>> GetBookmarksAsync(string userId);
+	Task<BookmarkEntity?> GetBookmarkByIdAsync(Guid id);
+	Task<List<BookmarkEntity>> GetBookmarksAsync(string userId);
 	Task<Guid> CreateBookmarkAsync(CreateBookmarkRequest request);
 	Task UpdateBookmarkAsync(UpdateBookmarkRequest bookmark);
 	Task DeleteBookmarkAsync(Guid id);
@@ -25,12 +28,12 @@ public class BookmarksService : IBookmarksService
 		_bookmarksRepository = bookmarksRepository;
 	}
 
-	public async Task<Bookmark?> GetBookmarkByIdAsync(Guid id)
+	public async Task<BookmarkEntity?> GetBookmarkByIdAsync(Guid id)
 	{
 		return await _bookmarksRepository.GetBookmarkByIdAsync(id);
 	}
 
-	public async Task<List<Bookmark>> GetBookmarksAsync(string userId)
+	public async Task<List<BookmarkEntity>> GetBookmarksAsync(string userId)
 	{
 		return await _bookmarksRepository.GetBookmarksAsync(userId);
 	}
@@ -39,7 +42,7 @@ public class BookmarksService : IBookmarksService
 	{
 		if (string.IsNullOrWhiteSpace(request.UserId)) throw new ArgumentException("UserId is required.");
 
-		var bookmark = new Bookmark
+		var bookmark = new BookmarkEntity
 		{
 			Id = Guid.NewGuid(),
 			Title = request.Title,
@@ -51,9 +54,19 @@ public class BookmarksService : IBookmarksService
 		return await _bookmarksRepository.CreateBookmarkAsync(bookmark);
 	}
 
-	public async Task UpdateBookmarkAsync(UpdateBookmarkRequest bookmark)
+	public async Task UpdateBookmarkAsync(UpdateBookmarkRequest request)
 	{
-		await _bookmarksRepository.UpdateBookmarkAsync(bookmark);
+		var bookmark = BookmarkMapper.FromUpdateBookmarkRequest(request);
+		try
+		{
+			var result = await _bookmarksRepository.UpdateBookmarkAsync(bookmark);
+			if (!result) throw new NotFoundException("Bookmark not found.");
+		}
+		catch (UniqueConstraintException e)
+		{
+			_logger.LogError(e.Message);
+			throw;
+		}
 	}
 
 	public async Task DeleteBookmarkAsync(Guid id)

@@ -7,5 +7,5 @@ public class ApplicationUser : IdentityUser
 {
 	[MaxLength(255)]
 	public string? Name { get; set; }
-	public ICollection<Collection>? Collections { get; set; } = [];
+	public ICollection<CollectionEntity>? Collections { get; set; } = [];
 }

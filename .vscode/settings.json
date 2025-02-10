@@ -1,0 +1,16 @@
+{
+  "dotnet.defaultSolution": "Codex.sln",
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "codex_dev",
+      "database": "codex_dev",
+      "username": "CodexAdmin",
+      "password": "Password123!"
+    }
+  ],
+  "dbcode.connections": []
+}

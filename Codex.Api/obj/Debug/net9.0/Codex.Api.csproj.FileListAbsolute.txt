@@ -1,11 +1,3 @@
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.csproj.AssemblyReference.cache
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.GeneratedMSBuildEditorConfig.editorconfig
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.AssemblyInfoInputs.cache
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.AssemblyInfo.cs
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.csproj.CoreCompileInputs.cache
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.MvcApplicationPartsAssemblyInfo.cs
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.MvcApplicationPartsAssemblyInfo.cache
-/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.sourcelink.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/appsettings.Development.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/appsettings.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Codex.Api.staticwebassets.endpoints.json
@@ -14,6 +6,8 @@
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Codex.Api.runtimeconfig.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Codex.Api.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Codex.Api.pdb
+/home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/EntityFramework.Exceptions.Common.dll
+/home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/EntityFramework.Exceptions.PostgreSQL.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Humanizer.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Microsoft.AspNetCore.Cryptography.Internal.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
@@ -119,6 +113,14 @@
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/tr/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/zh-Hans/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/trainingmontage/dev/projects/codex/Codex.Api/bin/Debug/net9.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.csproj.AssemblyReference.cache
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.GeneratedMSBuildEditorConfig.editorconfig
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.AssemblyInfoInputs.cache
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.AssemblyInfo.cs
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.csproj.CoreCompileInputs.cache
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.MvcApplicationPartsAssemblyInfo.cs
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.MvcApplicationPartsAssemblyInfo.cache
+/home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/Codex.Api.sourcelink.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/scopedcss/bundle/Codex.Api.styles.css
 /home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/staticwebassets.build.json
 /home/trainingmontage/dev/projects/codex/Codex.Api/obj/Debug/net9.0/staticwebassets.development.json

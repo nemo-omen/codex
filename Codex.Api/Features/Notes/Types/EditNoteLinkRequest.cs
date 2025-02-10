@@ -2,6 +2,7 @@ namespace Codex.Api.Features.Notes.Types;
 
 public record class EditNoteLinkRequest
 {
+	public Guid? Id { get; init; }
 	public required string Text { get; init; }
 	public int StartIndex { get; init; }
 	public int EndIndex { get; init; }

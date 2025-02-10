@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Codex.Api.Data;
 using Codex.Api.Features.Bookmarks;
+using Codex.Api.Features.Collections;
 using Codex.Api.Features.Identity;
 using Codex.Api.Features.Notes;
 using Codex.Api.Models;
@@ -64,9 +65,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 }, ServiceLifetime.Transient);
 
 builder.Services.AddScoped<IBookmarksRepository, BookmarksRepository>();
-builder.Services.AddScoped<IBookmarksService, BookmarksService>();
 builder.Services.AddScoped<INotesRepository, NotesRepository>();
+builder.Services.AddScoped<ICollectionsRepository, CollectionsRepository>();
+
+builder.Services.AddScoped<IBookmarksService, BookmarksService>();
 builder.Services.AddScoped<INotesService, NotesService>();
+builder.Services.AddScoped<ICollectionsService, CollectionsService>();
 
 var app = builder.Build();
 
@@ -88,3 +92,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

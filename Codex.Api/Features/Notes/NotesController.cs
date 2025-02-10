@@ -8,7 +8,7 @@ namespace Codex.Api.Features.Notes;
 
 [ApiController]
 [Route("api/[controller]")]
-public class NotesController : Controller
+public class NotesController : ControllerBase
 {
 	private readonly ILogger<NotesController> _logger;
 	private readonly INotesService _noteService;

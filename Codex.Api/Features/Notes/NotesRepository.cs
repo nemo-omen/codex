@@ -9,10 +9,10 @@ namespace Codex.Api.Features.Notes;
 
 public interface INotesRepository
 {
-	Task<List<Note>> GetNotesAsync(string userId);
-	Task<Note> GetNoteByIdAsync(Guid id);
-	Task<Guid> CreateNoteAsync(CreateNoteRequest request);
-	Task<Note> UpdateNoteAsync(EditNoteRequest request);
+	Task<List<NoteEntity>> GetNotesAsync(string userId);
+	Task<NoteEntity> GetNoteByIdAsync(Guid id);
+	Task<Guid> CreateNoteAsync(NoteEntity request);
+	Task<NoteEntity> UpdateNoteAsync(NoteEntity request);
 	Task DeleteNoteAsync(Guid id);
 }
 
@@ -27,7 +27,7 @@ public class NotesRepository : INotesRepository
 		_context = context;
 	}
 
-	public async Task<List<Note>> GetNotesAsync(string userId)
+	public async Task<List<NoteEntity>> GetNotesAsync(string userId)
 	{
 		_logger.LogInformation($"Attempting to retrieve notes for user: {userId}");
 		var notes = await _context.Notes
@@ -41,7 +41,7 @@ public class NotesRepository : INotesRepository
 		return notes;
 	}
 
-	public async Task<Note> GetNoteByIdAsync(Guid id)
+	public async Task<NoteEntity> GetNoteByIdAsync(Guid id)
 	{
 		var note = await _context.Notes
 			.AsNoTracking()
@@ -55,41 +55,32 @@ public class NotesRepository : INotesRepository
 		return note;
 	}
 
-	public async Task<Guid> CreateNoteAsync(CreateNoteRequest request)
+	public async Task<Guid> CreateNoteAsync(NoteEntity note)
 	{
-		var note = new Note
-		{
-			Id = Guid.NewGuid(),
-			Title = request.Title,
-			Content = request.Content,
-			UserId = request.UserId,
-			BookmarkId = request.BookmarkId
-		};
-
 		await _context.Notes.AddAsync(note);
 		await _context.SaveChangesAsync();
 		return note.Id;
 	}
 
-	public async Task<Note> UpdateNoteAsync(EditNoteRequest request)
+	public async Task<NoteEntity> UpdateNoteAsync(NoteEntity note)
 	{
-		var note = await _context.Notes
+		var existingNote = await _context.Notes
 			.Include(n => n.IncomingLinks)
 			.Include(n => n.OutgoingLinks)
 				.ThenInclude(l => l.Target)
-			.FirstOrDefaultAsync(n => n.Id == request.Id);
+			.FirstOrDefaultAsync(n => n.Id == note.Id);
 
-		if (note == null)
+		if (existingNote == null)
 			throw new NotFoundException("Note not found.");
 
-		note.Title = request.Title ?? note.Title;
-		note.Content = request.Content ?? note.Content;
+		existingNote.Title = note.Title ?? existingNote.Title;
+		existingNote.Content = note.Content ?? existingNote.Content;
 
-		if (request.OutgoingLinks != null)
+		if (note.OutgoingLinks != null)
 		{
-			foreach (var link in request.OutgoingLinks)
+			foreach (var link in note.OutgoingLinks)
 			{
-				var existingLink = note.OutgoingLinks
+				var existingLink = existingNote.OutgoingLinks
 					.FirstOrDefault(l => l.TargetId == link.TargetId);
 
 				var targetNote = await _context.Notes
@@ -99,17 +90,17 @@ public class NotesRepository : INotesRepository
 
 				if (existingLink is null)
 				{
-					var newLink = new NoteLink
+					var newLink = new NoteLinkEntity
 					{
 						Id = Guid.NewGuid(),
 						Text = link.Text!,
-						SourceId = note.Id,
+						SourceId = existingNote.Id,
 						TargetId = link.TargetId,
 						StartIndex = link.StartIndex,
 						EndIndex = link.EndIndex,
 					};
 
-					note.OutgoingLinks.Add(newLink);
+					existingNote.OutgoingLinks.Add(newLink);
 					targetNote.IncomingLinks.Add(newLink);
 					await _context.NoteLinks.AddAsync(newLink);
 				}
@@ -136,23 +127,23 @@ public class NotesRepository : INotesRepository
 			}
 		}
 
-		if (request.IncomingLinks != null)
+		if (note.IncomingLinks != null)
 		{
-			foreach (var link in request.IncomingLinks)
+			foreach (var link in note.IncomingLinks)
 			{
-				var existingLink = note.IncomingLinks.FirstOrDefault(l => l.TargetId == link.TargetId);
+				var existingLink = existingNote.IncomingLinks.FirstOrDefault(l => l.TargetId == link.TargetId);
 				if (existingLink == null)
 				{
-					var newLink = new NoteLink
+					var newLink = new NoteLinkEntity
 					{
 						Text = link.Text!,
-						SourceId = note.Id,
+						SourceId = existingNote.Id,
 						TargetId = link.TargetId,
 						StartIndex = link.StartIndex,
 						EndIndex = link.EndIndex
 					};
 
-					note.IncomingLinks.Add(newLink);
+					existingNote.IncomingLinks.Add(newLink);
 					await _context.NoteLinks.AddAsync(newLink);
 				}
 				else
@@ -166,7 +157,7 @@ public class NotesRepository : INotesRepository
 
 		// _context.Update(note);
 		await _context.SaveChangesAsync();
-		return note;
+		return existingNote;
 	}
 
 	public async Task DeleteNoteAsync(Guid id)
