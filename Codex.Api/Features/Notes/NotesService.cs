@@ -33,8 +33,9 @@ public class NotesService : INotesService
 			Title = request.Title,
 			Content = request.Content,
 			UserId = request.UserId,
-			BookmarkId = request.BookmarkId
 		};
+
+		if(request.BookmarkId is not null) note.BookmarkId = (Guid)request.BookmarkId;
 
 		return await _notesRepository.CreateNoteAsync(note);
 	}

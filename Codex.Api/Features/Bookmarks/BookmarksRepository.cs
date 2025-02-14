@@ -1,12 +1,12 @@
 using Codex.Api.Data;
 using Codex.Api.Exceptions;
-using Codex.Api.Features.Bookmarks.Types;
 using Codex.Api.Models;
+using Codex.Api.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Codex.Api.Features.Bookmarks;
 
-public interface IBookmarksRepository
+public interface IBookmarksRepository : IRepositoryBase<BookmarkEntity>
 {
 	Task<List<BookmarkEntity>> GetBookmarksAsync(string userId);
 	Task<BookmarkEntity?> GetBookmarkByIdAsync(Guid id);
@@ -16,15 +16,14 @@ public interface IBookmarksRepository
 	Task DeleteBookmarkAsync(Guid id);
 }
 
-public class BookmarksRepository : IBookmarksRepository
+public class BookmarksRepository : RepositoryBase<BookmarkEntity>, IBookmarksRepository
 {
 	private readonly ILogger<BookmarksRepository> _logger;
-	private readonly ApplicationDbContext _context;
 
 	public BookmarksRepository(ILogger<BookmarksRepository> logger, ApplicationDbContext context)
+		: base(context)
 	{
 		_logger = logger;
-		_context = context;
 	}
 
 
@@ -36,10 +35,10 @@ public class BookmarksRepository : IBookmarksRepository
 	public async Task<List<BookmarkEntity>> GetBookmarksAsync(string userId)
 	{
 		_logger.LogInformation($"Attempting to retrieve bookmarks for user: {userId}");
-		var bookmarks = await _context.Bookmarks
+		var bookmarks = await FindByCondition(b => string.Equals(b.UserId, userId))
 			.Include(b => b.Notes)
-			.Where(b => b.UserId == userId)
 			.ToListAsync();
+
 		_logger.LogInformation($"Successfully retrieved {bookmarks.Count} bookmarks for user: {userId}");
 		return bookmarks;
 	}
@@ -52,9 +51,9 @@ public class BookmarksRepository : IBookmarksRepository
 	public async Task<BookmarkEntity?> GetBookmarkByIdAsync(Guid id)
 	{
 		_logger.LogInformation($"Attempting to retrieve bookmark with ID: {id}");
-		var bookmark = await _context.Bookmarks
-			.AsNoTracking()
-			.FirstOrDefaultAsync(b => b.Id == id);
+		var bookmark = await FindByCondition(b => b.Id == id)
+			.Include(b => b.Notes)
+			.FirstOrDefaultAsync();
 
 		if (bookmark == null)
 		{
@@ -76,9 +75,9 @@ public class BookmarksRepository : IBookmarksRepository
 	public async Task<BookmarkEntity?> GetBookmarkByUrlAsync(string url)
 	{
 		_logger.LogInformation($"Attempting to retrieve bookmark with URL: {url}");
-		var bookmark = await _context.Bookmarks
-			.AsNoTracking()
-			.FirstOrDefaultAsync(b => b.Url == url);
+		var bookmark = await FindByCondition(b => string.Equals(b.Url, url))
+			.Include(b => b.Notes)
+			.FirstOrDefaultAsync();
 
 		if (bookmark == null)
 		{
@@ -101,18 +100,9 @@ public class BookmarksRepository : IBookmarksRepository
 	public async Task<Guid> CreateBookmarkAsync(BookmarkEntity bookmark)
 	{
 		_logger.LogInformation($"Attempting to create bookmark: {bookmark}");
-		_context.Bookmarks.Add(bookmark);
-		try
-		{
-			await _context.SaveChangesAsync();
-		}
-		catch (Exception e)
-		{
-			_logger.LogError(e.Message);
-			throw;
-		}
+		Create(bookmark);
+		await RepositoryContext.SaveChangesAsync();
 		_logger.LogInformation($"Bookmark created successfully with ID: {bookmark.Id}");
-
 		return bookmark.Id;
 	}
 
@@ -129,8 +119,8 @@ public class BookmarksRepository : IBookmarksRepository
 
 		_logger.LogInformation($"Attempting to update bookmark: {bookmark.Id}");
 
-		var toUpdate = await _context.Bookmarks
-			.FirstOrDefaultAsync(b => b.Id == bookmark.Id);
+		var toUpdate = await FindByCondition(b => b.Id == bookmark.Id)
+			.FirstOrDefaultAsync();
 
 		if (toUpdate == null)
 		{
@@ -142,8 +132,8 @@ public class BookmarksRepository : IBookmarksRepository
 		toUpdate.Url = bookmark.Url ?? toUpdate.Url;
 		toUpdate.Description = bookmark.Description ?? toUpdate.Description;
 
-		_context.Update(toUpdate);
-		await _context.SaveChangesAsync();
+		Update(toUpdate);
+		await RepositoryContext.SaveChangesAsync();
 		_logger.LogInformation($"Bookmark with ID: {bookmark.Id} updated successfully.");
 		return true;
 	}
@@ -157,18 +147,19 @@ public class BookmarksRepository : IBookmarksRepository
 	public async Task DeleteBookmarkAsync(Guid id)
 	{
 		_logger.LogInformation($"Attempting to delete bookmark with ID: {id}");
-		var bookmark = await _context.Bookmarks
-			.FirstOrDefaultAsync(b => b.Id == id);
+		var bookmark = await FindByCondition(b => b.Id == id)
+			.FirstOrDefaultAsync();
+
 		if (bookmark == null)
 		{
 			_logger.LogError($"Bookmark with id {id} not found.");
 			throw new NotFoundException("Bookmark not found.");
 		}
 
-		_context.Remove(bookmark);
+		Delete(bookmark);
 		try
 		{
-			await _context.SaveChangesAsync();
+			await RepositoryContext.SaveChangesAsync();
 		}
 		catch (Exception e)
 		{
@@ -176,6 +167,5 @@ public class BookmarksRepository : IBookmarksRepository
 			throw;
 		}
 		_logger.LogInformation($"Bookmark with ID: {id} deleted successfully.");
-
 	}
 }

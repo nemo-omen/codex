@@ -18,6 +18,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+    <PackageReference Include="Respawn" Version="6.2.1" />
     <PackageReference Include="Testcontainers" Version="4.1.0" />
     <PackageReference Include="TestContainers.Container.Database.PostgreSql" Version="1.5.4" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.1.0" />

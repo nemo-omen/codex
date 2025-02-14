@@ -8,30 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Codex.Tests.Integration.Notes;
 
 [Collection("Test DB Collection")]
-public class NotesRepositoryTests
+public class NotesRepositoryTests(IntegrationTestFactory factory) : IntegrationTestBase(factory)
 {
-    // private readonly INotesRepository _notesRepository;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly string _testUserId;
-
-    public NotesRepositoryTests(TestDbFixture fixture)
-    {
-        _serviceProvider = fixture.ServiceProvider;
-        _testUserId = fixture.TestUserId;
-    }
-
-
     [Fact]
     public async Task NotesRepository_CreateNoteAsync_ShouldPersistNote()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await Factory.SeedTestUser(ServiceProvider);
+        var scope = ServiceProvider.CreateScope();
         var notesRepository = scope.ServiceProvider.GetRequiredService<INotesRepository>();
-        var transaction = await context.Database.BeginTransactionAsync();
 
         var note = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note",
             Content = "Test Content",
@@ -46,22 +34,19 @@ public class NotesRepositoryTests
         Assert.Equal(note.Content, retrievedNote.Content);
         Assert.Equal(note.BookmarkId, retrievedNote.BookmarkId);
         Assert.Equal(note.CollectionId, retrievedNote.CollectionId);
-
-        await transaction.RollbackAsync();
-        await transaction.DisposeAsync();
+        await Respawner.ResetAsync(Connection);
     }
 
     [Fact]
     public async Task NotesRepository_GetNotesAsync_ShouldReturnNotes()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await Factory.SeedTestUser(ServiceProvider);
+        var scope = ServiceProvider.CreateScope();
         var notesRepository = scope.ServiceProvider.GetRequiredService<INotesRepository>();
-        var transaction = await context.Database.BeginTransactionAsync();
 
         var note = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note",
             Content = "Test Content",
@@ -69,7 +54,7 @@ public class NotesRepositoryTests
 
         var note2 = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note 2",
             Content = "Test Content 2",
@@ -78,24 +63,22 @@ public class NotesRepositoryTests
         await notesRepository.CreateNoteAsync(note);
         await notesRepository.CreateNoteAsync(note2);
 
-        var notes = await notesRepository.GetNotesAsync(_testUserId);
+        var notes = await notesRepository.GetNotesAsync(TestUserId);
 
         Assert.Equal(2, notes.Count);
-        await transaction.RollbackAsync();
-        await transaction.DisposeAsync();
+        await Respawner.ResetAsync(Connection);
     }
 
     [Fact]
     public async Task NotesRepository_GetNoteByIdAsync_ShouldReturnNote()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await Factory.SeedTestUser(ServiceProvider);
+        using var scope = ServiceProvider.CreateScope();
         var notesRepository = scope.ServiceProvider.GetRequiredService<INotesRepository>();
-        var transaction = await context.Database.BeginTransactionAsync();
 
         var note = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note",
             Content = "Test Content",
@@ -109,21 +92,19 @@ public class NotesRepositoryTests
         Assert.Equal(note.Id, retrievedNote.Id);
         Assert.Equal(note.Title, retrievedNote.Title);
         Assert.Equal(note.Content, retrievedNote.Content);
-        await transaction.RollbackAsync();
-        await transaction.DisposeAsync();
+        await Respawner.ResetAsync(Connection);
     }
 
     [Fact]
     public async Task NoteRepository_UpdateNoteAsync_ShouldUpdateNote()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await Factory.SeedTestUser(ServiceProvider);
+        using var scope = ServiceProvider.CreateScope();
         var notesRepository = scope.ServiceProvider.GetRequiredService<INotesRepository>();
-        var transaction = await context.Database.BeginTransactionAsync();
 
         var note = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note",
             Content = "Test Content",
@@ -133,7 +114,7 @@ public class NotesRepositoryTests
 
         var updatedNote = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = note.Id,
             Title = "Updated Note",
             Content = "Updated Content",
@@ -147,21 +128,19 @@ public class NotesRepositoryTests
         Assert.Equal(updatedNote.Id, retrievedNote.Id);
         Assert.Equal(updatedNote.Title, retrievedNote.Title);
         Assert.Equal(updatedNote.Content, retrievedNote.Content);
-        await transaction.RollbackAsync();
-        await transaction.DisposeAsync();
+        await Respawner.ResetAsync(Connection);
     }
 
     [Fact]
     public async Task NoteRepository_DeleteNoteAsync_ShouldDeleteNote()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await Factory.SeedTestUser(ServiceProvider);
+        using var scope = ServiceProvider.CreateScope();
         var notesRepository = scope.ServiceProvider.GetRequiredService<INotesRepository>();
-        var transaction = await context.Database.BeginTransactionAsync();
 
         var note = new NoteEntity
         {
-            UserId = _testUserId,
+            UserId = TestUserId,
             Id = Guid.NewGuid(),
             Title = "Test Note",
             Content = "Test Content",
@@ -173,8 +152,6 @@ public class NotesRepositoryTests
 
         await Assert.ThrowsAsync<NotFoundException>(async () =>
             await notesRepository.GetNoteByIdAsync(note.Id));
-
-        await transaction.RollbackAsync();
-        await transaction.DisposeAsync();
+        await Respawner.ResetAsync(Connection);
     }
 }
